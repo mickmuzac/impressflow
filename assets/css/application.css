@@ -1,0 +1,27 @@
+#canvas{
+
+	height: 80%;
+	border: 1px solid #aaa;
+}
+
+body{
+
+	height: 100%;
+	width: 100%;
+}
+
+.gIcon{
+
+	
+}
+
+.slides{
+
+	width: 200px;
+	height: 125px;
+	border: 1px solid #000;
+	margin-bottom: 5px;
+}
+
+.container-fluid,
+.row-fluid { height: inherit; }
