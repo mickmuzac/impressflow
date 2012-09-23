@@ -2,28 +2,37 @@ var self, isBeingEdited = null;
 
 var loadInitialStyle = function(obj){
 
-	
-	var styleArr = ["font-size", "color"];
+	var id = (obj.type == "text") ? "#"+obj.id + " span" : obj.id;
+	var styleArr = ["font-size", "color", "line-height", "height"];
 	var tempArr = {};
-	var length = 2;
+	var length = 4;
 	
 	for(var i = 0; i < length; i++)
-		tempArr[styleArr[i]] = $("#"+obj.id).css(styleArr[i]);
-		
+		tempArr[styleArr[i]] = $(id).css(styleArr[i]);
+	
+	obj.style = tempArr;
 	return tempArr;		
 };
 
 //Content edit expects a contentObject and will go into "edit" mode depending on type
 var objectClick = function(obj){
 	
-	//It's important to note that Knockout.js takes care of setting "obj" for us
-	var styles = (obj.style == null) ? loadInitialStyle(obj) : obj.styles;
-
-
-	if(obj.type == "text")
-		$("#"+obj.id).replaceWith("<input id='"+obj.id+"' type='text' value='"+obj.value+"' />");
+	console.log(obj);
 	
-	$("#"+obj.id).css(styles);
+	//It's important to note that Knockout.js takes care of setting "obj" for us
+	var styles = loadInitialStyle(obj);//(obj.style == null) ? loadInitialStyle(obj) : obj.style;
+
+	console.log(styles);
+	
+	if(obj.type == "text"){
+		$("#"+obj.id + " span").hide();
+		$("#"+obj.id + " textarea").show();
+		$("#"+obj.id + " textarea").focus();
+		
+		$("#"+obj.id + " textarea").css(styles);
+	}
+	
+	
 	
 	//Another way to read obj, is "obj is being edited"
 	isBeingEdited = obj;
@@ -31,12 +40,13 @@ var objectClick = function(obj){
 
 var objectStopClick = function(obj){
 	
-	//Do I have to re-add a data-bind? Check when necessary...
-	if(obj.type == "text")
-		$("#"+obj.id).replaceWith("<span id='"+obj.id+"' class='object' data-bind='text:value'>"+obj.value+"</span>");
-		
-	$("#"+obj.id).css(obj.styles);
-	console.log(obj.styles);
+	console.log("STOP: " + $("#"+obj.id));
+	
+	if(obj.type == "text"){
+	
+		$("#"+obj.id + " span").show();
+		$("#"+obj.id + " textarea").hide();
+	}
 	
 	isBeingEdited = null;
 };
@@ -44,7 +54,7 @@ var objectStopClick = function(obj){
 var contentObject = function(obj){
 
 	this.type = obj.type;
-	this.value = obj.value;
+	this.value = ko.observable(obj.value);
 	this.id = obj.id;
 	
 	this.style = null;

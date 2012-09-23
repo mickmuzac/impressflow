@@ -62,9 +62,15 @@
 		  
 
 		  
-		  <div id="canvas" class="span10" data-bind="foreach: currentObjects">
+		  <div id="canvas" class="span10 droppable" data-bind="foreach: currentObjects">
 		  
-			<span class="object" style="font-size: 24px;" data-bind="text:value, attr:{id:id}"></span>
+			<div data-bind="attr:{id:id}" class="draggable">
+				<span class="object" style="font-size: 24px; line-height: 24px;" data-bind="text:value"></span>
+				
+				<!-- ko if:type == "text" -->
+					<textarea style="display: none;" data-bind="value:value" type='text' ></textarea>
+				<!-- /ko -->
+			</div>
 		  </div>
 	  
 	  </div>
@@ -74,6 +80,7 @@
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
     <script src="assets/js/jquery.js"></script>
+    <script src="assets/js/jquery-ui.js"></script>
     <script src="assets/js/bootstrap.js"></script>
 	<script src="assets/js/application.js"></script>
 	<script src="assets/js/knockout-2.1.0.js"></script>
@@ -81,17 +88,17 @@
 		var presentationTemp  = new presentationModel;
 	
 		$(function(){
+		
 			
-			$("#canvas").click(function(event){
-			console.log(isBeingEditted);
-				if(event.target != this){
-					return true;
-				}
+			$(".droppable").droppable();
 			
-				if(isBeingEdited != null){
+			$("#canvas").on("blur", "textarea", function(event){
+				
+				var temp = $(this).parent().attr("id").split("-");
+				if(isBeingEdited == self.allSlides()[temp[2]].allObjects()[temp[1]]){
 					
-					
-					//objectStopClick(isBeingEdited);
+					console.log("BLUR ");
+					objectStopClick(isBeingEdited);
 				}
 			});
 			
@@ -104,7 +111,7 @@
 				if(isBeingEdited != null)
 					objectStopClick(isBeingEdited);
 				
-				var temp = $(this).attr("id").split("-");
+				var temp = $(this).parent().attr("id").split("-");
 				objectClick(self.allSlides()[temp[2]].allObjects()[temp[1]]);
 			});
 			
@@ -112,6 +119,7 @@
 			
 			//Handle menu options
 			$(".nav li").click(function(){
+				
 				
 				switch($(this).attr("class")){
 				
@@ -128,6 +136,7 @@
 						break;
 				}
 				
+				$(".draggable").draggable();
 				console.log(self.currentSlide());
 				console.log(self.allSlides());
 			});
