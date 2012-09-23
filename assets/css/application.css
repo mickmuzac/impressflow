@@ -1,13 +1,14 @@
 #canvas{
 
-	height: 80%;
+	height: 100%;
 	border: 1px solid #aaa;
 }
 
-body{
+body, html{
 
-	height: 100%;
+	height: 80%;
 	width: 100%;
+
 }
 
 .gIcon{

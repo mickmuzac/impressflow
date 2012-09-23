@@ -64,7 +64,7 @@
 		  
 		  <div id="canvas" class="span10" data-bind="foreach: currentObjects">
 		  
-			<span data-bind="text:value"></span>
+			<span class="object" style="font-size: 24px;" data-bind="text:value, attr:{id:id}"></span>
 		  </div>
 	  
 	  </div>
@@ -82,6 +82,35 @@
 	
 		$(function(){
 			
+			$("#canvas").click(function(event){
+			console.log(isBeingEditted);
+				if(event.target != this){
+					return true;
+				}
+			
+				if(isBeingEdited != null){
+					
+					
+					//objectStopClick(isBeingEdited);
+				}
+			});
+			
+			//Handle slide clicking
+			$("#canvas").on("click", ".object", function(event){
+				
+
+				
+				console.log(isBeingEdited);
+				if(isBeingEdited != null)
+					objectStopClick(isBeingEdited);
+				
+				var temp = $(this).attr("id").split("-");
+				objectClick(self.allSlides()[temp[2]].allObjects()[temp[1]]);
+			});
+			
+			
+			
+			//Handle menu options
 			$(".nav li").click(function(){
 				
 				switch($(this).attr("class")){
@@ -89,16 +118,24 @@
 					case "addSlide":
 						addSlide();
 						break;
+						
 					case "addText":
-						addObject("text", "TESTING");
+						addObject("text", "Edit Me");
+						break;
+					
+					case "addImage":
+						addObject("image", "Edit Me");
+						break;
 				}
 				
 				console.log(self.currentSlide());
 				console.log(self.allSlides());
 			});
 			
-			$("#sideSlides").on("click", ".slides", function(){
-			
+			//Handle slide clicking
+			$("#sideSlides").on("click", ".slides", function(event){
+				
+				
 				
 				var temp = $(this).attr("id").split("-")[1];
 				if(self.currentSlide() != temp){
@@ -108,9 +145,7 @@
 					$(this).css({"border-color":"red"});
 					self.currentSlide(temp);
 				}
-				
 			});
-			
 		});
 	
 		ko.applyBindings(presentationTemp);
