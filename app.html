@@ -64,8 +64,8 @@
 		  
 		  <div id="canvas" class="span10 droppable" data-bind="foreach: currentObjects">
 		  
-			<div data-bind="attr:{id:id}" class="draggable">
-				<span class="object" style="font-size: 24px; line-height: 24px;" data-bind="text:value"></span>
+			<div data-bind="attr:{id:id}" style="font-size: 24px; line-height: 24px;" class="draggable resizable object ui-widget-content">
+				<span data-bind="text:readSanatizedValue"></span>
 				
 				<!-- ko if:type == "text" -->
 					<textarea style="display: none;" data-bind="value:value" type='text' ></textarea>
@@ -86,76 +86,6 @@
 	<script src="assets/js/knockout-2.1.0.js"></script>
 	<script>
 		var presentationTemp  = new presentationModel;
-	
-		$(function(){
-		
-			
-			$(".droppable").droppable();
-			
-			$("#canvas").on("blur", "textarea", function(event){
-				
-				var temp = $(this).parent().attr("id").split("-");
-				if(isBeingEdited == self.allSlides()[temp[2]].allObjects()[temp[1]]){
-					
-					console.log("BLUR ");
-					objectStopClick(isBeingEdited);
-				}
-			});
-			
-			//Handle slide clicking
-			$("#canvas").on("click", ".object", function(event){
-				
-
-				
-				console.log(isBeingEdited);
-				if(isBeingEdited != null)
-					objectStopClick(isBeingEdited);
-				
-				var temp = $(this).parent().attr("id").split("-");
-				objectClick(self.allSlides()[temp[2]].allObjects()[temp[1]]);
-			});
-			
-			
-			
-			//Handle menu options
-			$(".nav li").click(function(){
-				
-				
-				switch($(this).attr("class")){
-				
-					case "addSlide":
-						addSlide();
-						break;
-						
-					case "addText":
-						addObject("text", "Edit Me");
-						break;
-					
-					case "addImage":
-						addObject("image", "Edit Me");
-						break;
-				}
-				
-				$(".draggable").draggable();
-				console.log(self.currentSlide());
-				console.log(self.allSlides());
-			});
-			
-			//Handle slide clicking
-			$("#sideSlides").on("click", ".slides", function(event){
-				
-				
-				
-				var temp = $(this).attr("id").split("-")[1];
-				if(self.currentSlide() != temp){
-				
-
-					$("#s-"+self.currentSlide()).css({"border-color":"black"});
-					$(this).css({"border-color":"red"});
-					self.currentSlide(temp);
-				}
-			});
-		});
 	
 		ko.applyBindings(presentationTemp);
 	</script>
