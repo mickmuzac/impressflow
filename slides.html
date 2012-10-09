@@ -86,6 +86,20 @@
     <div id="bored" class="step slide" data-x="-1000" data-y="-1500">
         <q data-bind="text:allSlides"></q>
 		<span data-bind="text:allSlides"></span>
+		
+		<canvas id="myCanvas" width="200" height="100" style="border:1px solid #c3c3c3;">
+Your browser does not support the HTML5 canvas tag.
+</canvas>
+
+<script>
+
+var c=document.getElementById("myCanvas");
+var ctx=c.getContext("2d");
+ctx.fillStyle="#FF0000";
+ctx.fillRect(0,0,150,75);
+
+</script>
+		
     </div>
 
     <!--
@@ -131,6 +145,7 @@
         <span class="try">then you should try</span>
         <h1>impress.js<sup>*</sup></h1>
         <span class="footnote"><sup>*</sup> no rhyme intended</span>
+		<image src="image.png" />
     </div>
 
     <!--

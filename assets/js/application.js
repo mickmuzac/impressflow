@@ -1,4 +1,6 @@
-var self, isBeingEdited = null;
+var self, isBeingEdited = null, previouslyBeingEdited = null, currentZoom = null;
+var canvasHeight = $('#canvas').height();
+var canvasWidth = $('#canvas').width();
 
 //This function copies the "edit" style from a main style
 var loadInitialStyle = function(obj){
@@ -54,6 +56,7 @@ var objectStopClick = function(obj){
 		$("#"+obj.id + " textarea").hide();
 	}
 	
+	previouslyBeingEdited = isBeingEdited;
 	isBeingEdited = null;
 };
 
@@ -135,7 +138,7 @@ var handleNewObjectRefresh = function(){
 
 	$(".resizable").resizable({
 		start: function(event, ui) {  
-			console.log("RESIZE START "+$(this).offset());
+			console.log(ui);
 			//$(this).css({
 				//position: "relative !important",
 				//top: $(this).position().top + " !important",
@@ -147,7 +150,51 @@ var handleNewObjectRefresh = function(){
 		}
 	});
 
-	$(".draggable").draggable();
+	$(".draggable").draggable({
+		
+		drag: function(evt, ui){
+		    // zoom fix. -1 implies that nothing has been zoomed yet
+			focusOn(this);
+			
+			//MAKE THE FOLLOWING 2 LINES A FUNCTION!
+			var temp = $(this).attr("id").split("_");
+			previouslyBeingEdited = self.allSlides()[temp[2]].allObjects()[temp[1]];
+		},
+	});
+};
+
+var focusOn = function(obj){
+
+	$(".draggable").css("border","#AAA solid 1px");
+	$(obj).css("border","red solid 1px");
+};
+
+var handleZoom = function(opt){
+	
+	
+	
+	var zoomOpt = {closeclick:false, root:$("#canvas"), debug:true};
+	
+	if(previouslyBeingEdited == null)
+		return;
+		
+	currentZoom = (currentZoom == null) ? 0.5 : currentZoom;
+
+	if(opt == "in"){
+		
+		currentZoom = (currentZoom < 1) ? currentZoom + .25: currentZoom;
+		zoomOpt.targetsize = currentZoom;
+		$("#"+previouslyBeingEdited.id).zoomTo(zoomOpt);
+	}
+	
+	else{
+		
+		currentZoom = (currentZoom > .25)? currentZoom - .25: currentZoom;
+		zoomOpt.targetsize = currentZoom;
+		$("#"+previouslyBeingEdited.id).zoomTo(zoomOpt);
+	}
+	
+	console.log("Current Zoom: " + currentZoom);
 };
 
 $(function(){
@@ -157,6 +204,7 @@ $(function(){
 	
 	$("#canvas").on("blur", "textarea", function(event){
 		
+		
 		var temp = $(this).parent().attr("id").split("_");
 		if(isBeingEdited == self.allSlides()[temp[2]].allObjects()[temp[1]]){
 			
@@ -165,11 +213,12 @@ $(function(){
 		}
 	});
 	
-	//Handle slide clicking
+	//Handle object AND full slide clicking
 	$("#canvas").on("click", ".object", function(event){
 		
 		console.log(isBeingEdited);
 		
+		$(".draggable").css("border","#AAA solid 1px");
 		var temp = $(this).attr("id").split("_");
 		var tempCurrentClickNow = self.allSlides()[temp[2]].allObjects()[temp[1]];
 		
@@ -184,6 +233,8 @@ $(function(){
 			
 			objectClick(tempCurrentClickNow);
 		}
+		
+		
 	});
 	
 	$("#canvas").on("keyup", "textarea", function(event){
@@ -212,6 +263,14 @@ $(function(){
 			case "addImage":
 				addObject("image", "Edit Me");
 				break;
+				
+			case "zoomIn":
+				handleZoom("in");
+				break;
+			
+			case "zoomOut":
+				handleZoom("out");
+				break;
 		}
 		
 		handleNewObjectRefresh();
@@ -219,7 +278,7 @@ $(function(){
 		console.log(self.allSlides());
 	});
 	
-	//Handle slide clicking
+	//Handle mini slide clicking
 	$("#sideSlides").on("click", ".slides", function(event){
 		
 		
