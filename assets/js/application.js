@@ -50,7 +50,7 @@ var objectStopClick = function(obj){
 	
 	if(obj.type == "text"){
 		
-		$("#"+obj.id).resizable();
+		handleNewObjectRefresh();
 		
 		$("#"+obj.id + " span").show();
 		$("#"+obj.id + " textarea").hide();
@@ -139,11 +139,21 @@ var handleNewObjectRefresh = function(){
 	$(".resizable").resizable({
 		start: function(event, ui) {  
 			console.log(ui);
-			//$(this).css({
-				//position: "relative !important",
+			$(this).css({
+				position: "relative"
 				//top: $(this).position().top + " !important",
 				//left: $(this).position().left + " !important"
-			//});
+			});
+			
+			ui.position = $(this).position();
+		},
+		resize: function(event, ui) {  
+			console.log(ui);
+			$(this).css({
+				position: "relative !important"
+			});
+			
+			ui.position = $(this).position();
 		},
 		stop: function(event, ui) {
 			
@@ -152,14 +162,22 @@ var handleNewObjectRefresh = function(){
 
 	$(".draggable").draggable({
 		
-		drag: function(evt, ui){
+		start: function(evt, ui){
 		    // zoom fix. -1 implies that nothing has been zoomed yet
 			focusOn(this);
+			
+			$("#canvas").add(this).css("cursor", "none");
 			
 			//MAKE THE FOLLOWING 2 LINES A FUNCTION!
 			var temp = $(this).attr("id").split("_");
 			previouslyBeingEdited = self.allSlides()[temp[2]].allObjects()[temp[1]];
 		},
+		
+		stop: function(evt, ui){
+		
+			$("#canvas").css("cursor", "default");
+			$(this).css("cursor", "pointer");
+		}
 	});
 };
 
@@ -173,7 +191,7 @@ var handleZoom = function(opt){
 	
 	
 	
-	var zoomOpt = {closeclick:false, root:$("#canvas"), debug:true};
+	var zoomOpt = {closeclick:false, root:$("#canvas"), debug:false};
 	
 	if(previouslyBeingEdited == null)
 		return;
@@ -287,8 +305,11 @@ $(function(){
 		if(self.currentSlide() != temp){
 		
 
-			$("#s-"+self.currentSlide()).css({"border-color":"black"});
+			$("#s_"+self.currentSlide()).css({"border-color":"black"});
 			$(this).css({"border-color":"red"});
+			
+			console.log("border red: " + self.currentSlide());
+			
 			self.currentSlide(temp);
 		}
 	});
@@ -306,3 +327,6 @@ $(function(){
         });
     };
 })(jQuery);
+
+
+
