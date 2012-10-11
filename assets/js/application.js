@@ -1,4 +1,6 @@
-var self, isBeingEdited = null, previouslyBeingEdited = null, currentZoom = null;
+var self, isBeingEdited = null, previouslyBeingEdited = null, 
+currentZoom = null, currentResizePosition = {top: 0, left: 0}, 
+cachejQObj = null, ignoreResizeHover = false;
 var canvasHeight = $('#canvas').height();
 var canvasWidth = $('#canvas').width();
 
@@ -50,7 +52,7 @@ var objectStopClick = function(obj){
 	
 	if(obj.type == "text"){
 		
-		handleNewObjectRefresh();
+		handleNewObjectRefresh(obj);
 		
 		$("#"+obj.id + " span").show();
 		$("#"+obj.id + " textarea").hide();
@@ -81,9 +83,12 @@ var contentObject = function(obj){
 var addObject = function(type, value){
 	
 	var temp = self.allSlides()[self.currentSlide()].allObjects;
-	temp.push(new contentObject({"type": type, "value": value, "id":"o_" + temp().length + "_" + self.currentSlide()}));
+	var tempObj = new contentObject({"type": type, "value": value, "id":"o_" + temp().length + "_" + self.currentSlide()});
+	temp.push(tempObj);
 		
 	self.allSlides.valueHasMutated();
+	
+	return tempObj;
 };
 
 var addSlide = function(){
@@ -134,49 +139,84 @@ var presentationModel = function() {
 
 */
 
-var handleNewObjectRefresh = function(){
+var handleZoomJumpFix = function(obj, ui, position){
 
-	$(".resizable").resizable({
+	obj.css({
+		top: position.top + "px",
+		left: position.left + "px"
+	});
+	
+	ui.originalPosition = position;
+	ui.position = position;
+};
+
+var handleNewObjectRefresh = function(obj){
+	
+	//Need to figure out how to handle refreshing all
+	if(obj == null)
+		return;
+	
+	$("#" + obj.id).resizable({
+		
+		cacheThis: null,
+	
 		start: function(event, ui) {  
-			console.log(ui);
-			$(this).css({
-				position: "relative"
-				//top: $(this).position().top + " !important",
-				//left: $(this).position().left + " !important"
-			});
+			ignoreResizeHover = true;
+			cacheThis = $(this);
 			
-			ui.position = $(this).position();
-		},
-		resize: function(event, ui) {  
-			console.log(ui);
-			$(this).css({
-				position: "relative !important"
-			});
+			focusOn(cacheThis);
 			
-			ui.position = $(this).position();
+			handleZoomJumpFix(cacheThis, ui, currentResizePosition);
 		},
+		
+		resize: function(event, ui){
+		
+			handleZoomJumpFix(cacheThis, ui, currentResizePosition);
+		},
+		
 		stop: function(event, ui) {
 			
+			ignoreResizeHover = false;
 		}
 	});
 
-	$(".draggable").draggable({
+	$("#" + obj.id).draggable({
+		
+		 tempX: 0,
+		 tempY: 0,
+		 cacheThis: null,
 		
 		start: function(evt, ui){
-		    // zoom fix. -1 implies that nothing has been zoomed yet
-			focusOn(this);
+			cacheThis = $(this);
+			focusOn(cacheThis);
 			
+			//Scaling while zoomed in is still incorrect, hide cursor
 			$("#canvas").add(this).css("cursor", "none");
 			
+			ignoreResizeHover = true;
+			
+			handleZoomJumpFix(cacheThis, ui, currentResizePosition);
+			
+			tempX = currentResizePosition.left - evt.clientX;
+			tempY = currentResizePosition.top - evt.clientY;
+			
 			//MAKE THE FOLLOWING 2 LINES A FUNCTION!
-			var temp = $(this).attr("id").split("_");
+			var temp = cacheThis.attr("id").split("_");
 			previouslyBeingEdited = self.allSlides()[temp[2]].allObjects()[temp[1]];
 		},
 		
-		stop: function(evt, ui){
+		drag: function(evt, ui){
+			
+			handleZoomJumpFix(cacheThis, ui, {top: tempY+evt.clientY, left: tempX+evt.clientX});
+		},
 		
+		stop: function(evt, ui){
+			
+			ignoreResizeHover = false;
+
+			//Show cursor again
 			$("#canvas").css("cursor", "default");
-			$(this).css("cursor", "pointer");
+			cacheThis.css("cursor", "pointer");
 		}
 	});
 };
@@ -184,7 +224,7 @@ var handleNewObjectRefresh = function(){
 var focusOn = function(obj){
 
 	$(".draggable").css("border","#AAA solid 1px");
-	$(obj).css("border","red solid 1px");
+	obj.css("border","red solid 1px");
 };
 
 var handleZoom = function(opt){
@@ -196,18 +236,18 @@ var handleZoom = function(opt){
 	if(previouslyBeingEdited == null)
 		return;
 		
-	currentZoom = (currentZoom == null) ? 0.5 : currentZoom;
+	currentZoom = (currentZoom == null) ? 0.4 : currentZoom;
 
 	if(opt == "in"){
 		
-		currentZoom = (currentZoom < 1) ? currentZoom + .25: currentZoom;
+		currentZoom = (currentZoom < 1) ? currentZoom + .2: currentZoom;
 		zoomOpt.targetsize = currentZoom;
 		$("#"+previouslyBeingEdited.id).zoomTo(zoomOpt);
 	}
 	
 	else{
 		
-		currentZoom = (currentZoom > .25)? currentZoom - .25: currentZoom;
+		currentZoom = (currentZoom > .2)? currentZoom - .2: currentZoom;
 		zoomOpt.targetsize = currentZoom;
 		$("#"+previouslyBeingEdited.id).zoomTo(zoomOpt);
 	}
@@ -267,7 +307,7 @@ $(function(){
 	//Handle menu options
 	$(".nav li").click(function(){
 		
-		
+		var tempObj = null;
 		switch($(this).attr("class")){
 		
 			case "addSlide":
@@ -275,11 +315,11 @@ $(function(){
 				break;
 				
 			case "addText":
-				addObject("text", "Edit Me");
+				tempObj = addObject("text", "Edit Me");
 				break;
 			
 			case "addImage":
-				addObject("image", "Edit Me");
+				tempObj = addObject("image", "Edit Me");
 				break;
 				
 			case "zoomIn":
@@ -291,9 +331,22 @@ $(function(){
 				break;
 		}
 		
-		handleNewObjectRefresh();
+		handleNewObjectRefresh(tempObj);
 		console.log(self.currentSlide());
 		console.log(self.allSlides());
+	});
+	
+	//Handle mini slide clicking
+	$("#canvas").on("mouseover", ".object", function(event){
+		
+		if(!ignoreResizeHover){
+			cachejQObj = $(this);
+			currentResizePosition = {left: parseInt(cachejQObj.css("left")), 
+									top: parseInt(cachejQObj.css("top"))};
+			
+			console.log("current resize");
+			console.log(currentResizePosition);
+		}
 	});
 	
 	//Handle mini slide clicking

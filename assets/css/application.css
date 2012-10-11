@@ -10,8 +10,10 @@ body{
 	cursor: pointer;
 	width: 100px;
 	height: 100px;
+	left: 0;
+	top: 0;
 	display: block;
-	position: absolute;
+	position: absolute !important;
 }
 
 .gIcon{
