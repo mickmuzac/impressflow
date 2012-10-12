@@ -157,21 +157,18 @@ var handleNewObjectRefresh = function(obj){
 		return;
 	
 	$("#" + obj.id).resizable({
-		
-		cacheThis: null,
 	
 		start: function(event, ui) {  
 			ignoreResizeHover = true;
-			cacheThis = $(this);
 			
-			focusOn(cacheThis);
+			focusOn(cachejQObj);
 			
-			handleZoomJumpFix(cacheThis, ui, currentResizePosition);
+			handleZoomJumpFix(cachejQObj, ui, currentResizePosition);
 		},
 		
 		resize: function(event, ui){
 		
-			handleZoomJumpFix(cacheThis, ui, currentResizePosition);
+			handleZoomJumpFix(cachejQObj, ui, currentResizePosition);
 		},
 		
 		stop: function(event, ui) {
@@ -184,30 +181,28 @@ var handleNewObjectRefresh = function(obj){
 		
 		 tempX: 0,
 		 tempY: 0,
-		 cacheThis: null,
 		
 		start: function(evt, ui){
-			cacheThis = $(this);
-			focusOn(cacheThis);
+			focusOn(cachejQObj);
 			
 			//Scaling while zoomed in is still incorrect, hide cursor
-			$("#canvas").add(this).css("cursor", "none");
+			$("#canvas").add(cachejQObj).css("cursor", "none");
 			
 			ignoreResizeHover = true;
 			
-			handleZoomJumpFix(cacheThis, ui, currentResizePosition);
+			handleZoomJumpFix(cachejQObj, ui, currentResizePosition);
 			
 			tempX = currentResizePosition.left - evt.clientX;
 			tempY = currentResizePosition.top - evt.clientY;
 			
 			//MAKE THE FOLLOWING 2 LINES A FUNCTION!
-			var temp = cacheThis.attr("id").split("_");
+			var temp = cachejQObj.attr("id").split("_");
 			previouslyBeingEdited = self.allSlides()[temp[2]].allObjects()[temp[1]];
 		},
 		
 		drag: function(evt, ui){
 			
-			handleZoomJumpFix(cacheThis, ui, {top: tempY+evt.clientY, left: tempX+evt.clientX});
+			handleZoomJumpFix(cachejQObj, ui, {top: tempY+evt.clientY, left: tempX+evt.clientX});
 		},
 		
 		stop: function(evt, ui){
@@ -216,7 +211,10 @@ var handleNewObjectRefresh = function(obj){
 
 			//Show cursor again
 			$("#canvas").css("cursor", "default");
-			cacheThis.css("cursor", "pointer");
+			cachejQObj.css("cursor", "pointer");
+			
+			currentResizePosition = {left: parseInt(cachejQObj.css("left")), 
+						top: parseInt(cachejQObj.css("top"))};
 		}
 	});
 };
