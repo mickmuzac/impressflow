@@ -176,14 +176,27 @@ var handleNewObjectRefresh = function(obj){
 			ignoreResizeHover = false;
 		}
 	});
-
+	
+	$(".slide").draggable();
+	
 	$("#" + obj.id).draggable({
 		
 		 tempX: 0,
 		 tempY: 0,
+		 parent: null,
+		 parentPosition: null,
+		 width: null,
+		 height: null,
+		 tLeft: null,
+		 tTop: null,
 		
 		start: function(evt, ui){
 			focusOn(cachejQObj);
+			parent = cachejQObj.parent();
+			parentPosition = {top: parseInt(parent.css("top")), left: parseInt(parent.css("left"))};
+			
+			width = cachejQObj.width();
+			height = cachejQObj.height();
 			
 			//Scaling while zoomed in is still incorrect, hide cursor
 			$("#canvas").add(cachejQObj).css("cursor", "none");
@@ -202,7 +215,24 @@ var handleNewObjectRefresh = function(obj){
 		
 		drag: function(evt, ui){
 			
-			handleZoomJumpFix(cachejQObj, ui, {top: tempY+evt.clientY, left: tempX+evt.clientX});
+			tTop = tempY+evt.clientY;
+			tLeft = tempX+evt.clientX;
+			
+			if(tTop < parentPosition.top)
+				tTop = parentPosition.top;
+			
+			else if(tTop + height > parentPosition.top + parent.height())
+				tTop = parentPosition.top + parent.height()-height;
+			
+			if(tLeft < parentPosition.left)
+				tLeft = parentPosition.left;
+			
+			else if(tLeft + width > parentPosition.left + parent.width())
+				tLeft = parentPosition.left + parent.width()-width;
+			
+			
+			handleZoomJumpFix(cachejQObj, ui, {top: tTop, left: tLeft});
+			
 		},
 		
 		stop: function(evt, ui){
@@ -348,7 +378,7 @@ $(function(){
 	});
 	
 	//Handle mini slide clicking
-	$("#sideSlides").on("click", ".slides", function(event){
+	$("#sideSlides").on("click", ".allSlides", function(event){
 		
 		
 		
