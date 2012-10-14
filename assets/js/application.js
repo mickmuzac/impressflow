@@ -92,12 +92,22 @@ var addObject = function(type, value){
 };
 
 var addSlide = function(){
-
-	self.allSlides.push(new slideObject());
+	
+	var tempSlide = new slideObject(self.allSlides().length);
+	self.allSlides.push(tempSlide);
 	self.allSlides.valueHasMutated();
+	
+	handleNewSlideRefresh(tempSlide);
+	console.log(tempSlide);
+	return tempSlide;
 };
 
-var slideObject = function(){
+var slideObject = function(id){
+
+		//A slide object on the canvas is defined here
+		this.id = "s-" + id;
+		this.sidebarId = "s_" + id;
+		
 		this.allObjects = ko.observableArray();
 };
 
@@ -119,15 +129,13 @@ var presentationModel = function() {
 	/*
 		Observables and other variables
 	*/
-    self.allSlides = ko.observableArray([new slideObject()]);
+    self.allSlides = ko.observableArray();	
 	self.currentSlide = ko.observable(0);
 
-	self.currentObjects = ko.computed(function(){
+	/*self.currentObjects = ko.computed(function(){
 
-		//if(currentSlide > 0)
-			return self.allSlides()[self.currentSlide()].allObjects();
-		//else return [];
-	});
+		return self.allSlides()[self.currentSlide()].allObjects();
+	});*/
 };
 
 
@@ -148,6 +156,12 @@ var handleZoomJumpFix = function(obj, ui, position){
 	
 	ui.originalPosition = position;
 	ui.position = position;
+};
+
+var handleNewSlideRefresh = function(slide){
+
+	$("#" + slide.id).draggable();
+	console.log("#" + slide.id);
 };
 
 var handleNewObjectRefresh = function(obj){
@@ -177,8 +191,6 @@ var handleNewObjectRefresh = function(obj){
 		}
 	});
 	
-	$(".slide").draggable();
-	
 	$("#" + obj.id).draggable({
 		
 		 tempX: 0,
@@ -191,24 +203,29 @@ var handleNewObjectRefresh = function(obj){
 		 tTop: null,
 		
 		start: function(evt, ui){
+			//When starting a drag, focus on object, and calculate initial CSS values
 			focusOn(cachejQObj);
 			parent = cachejQObj.parent();
 			parentPosition = {top: parseInt(parent.css("top")), left: parseInt(parent.css("left"))};
 			
+			
 			width = cachejQObj.width();
 			height = cachejQObj.height();
-			
-			//Scaling while zoomed in is still incorrect, hide cursor
-			$("#canvas").add(cachejQObj).css("cursor", "none");
-			
-			ignoreResizeHover = true;
-			
-			handleZoomJumpFix(cachejQObj, ui, currentResizePosition);
 			
 			tempX = currentResizePosition.left - evt.clientX;
 			tempY = currentResizePosition.top - evt.clientY;
 			
-			//MAKE THE FOLLOWING 2 LINES A FUNCTION!
+			//Scaling while zoomed in is still incorrect, hide cursor
+			$("#canvas").add(cachejQObj).css("cursor", "none");
+			
+			//Stop refreshing location onHover
+			ignoreResizeHover = true;
+			
+			handleZoomJumpFix(cachejQObj, ui, currentResizePosition);
+			
+
+			
+			//MAKE THE FOLLOWING 2 LINES A FUNCTION! (Eventually)
 			var temp = cachejQObj.attr("id").split("_");
 			previouslyBeingEdited = self.allSlides()[temp[2]].allObjects()[temp[1]];
 		},
@@ -217,6 +234,9 @@ var handleNewObjectRefresh = function(obj){
 			
 			tTop = tempY+evt.clientY;
 			tLeft = tempX+evt.clientX;
+			
+			console.log(tTop + " " + tLeft);
+			console.log(parentPosition.top + " " + parentPosition.left);
 			
 			if(tTop < parentPosition.top)
 				tTop = parentPosition.top;
@@ -365,7 +385,7 @@ $(function(){
 	});
 	
 	//Handle mini slide clicking
-	$("#canvas").on("mouseover", ".object", function(event){
+	$("#canvas").on("mousedown", ".object, .slide", function(event){
 		
 		if(!ignoreResizeHover){
 			cachejQObj = $(this);

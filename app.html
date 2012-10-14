@@ -66,7 +66,7 @@
 		  <div id="canvasContainer" class="zoomViewport droppable span10">
 			  <div id="canvas" class="zoomContainer" data-bind="foreach: allSlides">
 					
-				<div class="slide" data-bind="foreach: allObjects">
+				<div class="slide" data-bind="foreach: allObjects, attr:{id:id}">
 					<div data-bind="attr:{id:id}" style="font-size: 24px; line-height: 24px;" class="draggable resizable object ui-widget-content">
 						<span data-bind="text:readSanatizedValue"></span>
 						

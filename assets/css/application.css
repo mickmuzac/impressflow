@@ -27,6 +27,9 @@ body{
 	display: block;
 	width: 300px;
 	height: 300px;
+	top: 0;
+	left: 0;
+	position: absolute;
 }
 
 .allSlides{
