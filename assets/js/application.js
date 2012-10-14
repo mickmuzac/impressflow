@@ -179,19 +179,23 @@ var handleNewSlideRefresh = function(slide){
 		 tempY: 0,
 		 tLeft: null,
 		 tTop: null,
+		 tempZoom: 1,
 		
 		start: function(evt, ui){
 			ignoreZoomRecalibration = true;
 			
-			tempX = currentResizePosition.left - evt.clientX;
-			tempY = currentResizePosition.top - evt.clientY;
+			//This is used to slightly fix the scale inaccuracies while dragging
+			tempZoom = (currentZoom == null || currentZoom == 0)? 1 : 1/currentZoom;
+			
+			tempX = currentResizePosition.left - tempZoom*evt.clientX;
+			tempY = currentResizePosition.top - tempZoom*evt.clientY;
 			handleZoomJumpFix(cachejQObj, ui, currentResizePosition);
 		},
 		drag: function(evt, ui){
 	
 			
-			tTop = tempY+evt.clientY;
-			tLeft = tempX+evt.clientX;
+			tTop = tempY+tempZoom*evt.clientY;
+			tLeft = tempX+tempZoom*evt.clientX;
 			
 			handleZoomJumpFix(cachejQObj, ui, {top: tTop, left: tLeft});
 		},
