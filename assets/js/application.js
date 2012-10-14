@@ -1,6 +1,6 @@
 var self, isBeingEdited = null, previouslyBeingEdited = null, 
 currentZoom = null, currentResizePosition = {top: 0, left: 0}, 
-cachejQObj = null, ignoreResizeHover = false;
+cachejQObj = null, ignoreZoomRecalibration = false;
 var canvasHeight = $('#canvas').height();
 var canvasWidth = $('#canvas').width();
 
@@ -87,6 +87,7 @@ var addObject = function(type, value){
 	temp.push(tempObj);
 		
 	self.allSlides.valueHasMutated();
+	handleNewObjectRefresh(tempObj);
 	
 	return tempObj;
 };
@@ -98,7 +99,7 @@ var addSlide = function(){
 	self.allSlides.valueHasMutated();
 	
 	handleNewSlideRefresh(tempSlide);
-	console.log(tempSlide);
+	//console.log(tempSlide);
 	return tempSlide;
 };
 
@@ -136,6 +137,16 @@ var presentationModel = function() {
 
 		return self.allSlides()[self.currentSlide()].allObjects();
 	});*/
+	
+	self.focusOnSlide = function(slideObj){		
+		
+		$(".allSlides").css({"border-color":"black"});
+		$(".slide").css({"border-color":"#AAA"});
+		$("#" + slideObj.id).add("#"+slideObj.sidebarId).css({"border-color":"blue"});
+	
+		//Keeps track of the current slide
+		self.currentSlide(slideObj.id.split("-")[1]);
+	};
 };
 
 
@@ -159,8 +170,38 @@ var handleZoomJumpFix = function(obj, ui, position){
 };
 
 var handleNewSlideRefresh = function(slide){
-
-	$("#" + slide.id).draggable();
+	
+	//Unfortunately, will have to reimplement slide draggable instead of using
+	//object draggable because a slide shouldn't be limited by its parent
+	$("#" + slide.id).draggable({
+	
+		 tempX: 0,
+		 tempY: 0,
+		 tLeft: null,
+		 tTop: null,
+		
+		start: function(evt, ui){
+			ignoreZoomRecalibration = true;
+			
+			tempX = currentResizePosition.left - evt.clientX;
+			tempY = currentResizePosition.top - evt.clientY;
+			handleZoomJumpFix(cachejQObj, ui, currentResizePosition);
+		},
+		drag: function(evt, ui){
+	
+			
+			tTop = tempY+evt.clientY;
+			tLeft = tempX+evt.clientX;
+			
+			handleZoomJumpFix(cachejQObj, ui, {top: tTop, left: tLeft});
+		},
+		
+		stop: function(event, ui) {
+			
+			ignoreZoomRecalibration = false;
+		}
+	
+	});
 	console.log("#" + slide.id);
 };
 
@@ -173,10 +214,7 @@ var handleNewObjectRefresh = function(obj){
 	$("#" + obj.id).resizable({
 	
 		start: function(event, ui) {  
-			ignoreResizeHover = true;
-			
-			focusOn(cachejQObj);
-			
+			ignoreZoomRecalibration = true;			
 			handleZoomJumpFix(cachejQObj, ui, currentResizePosition);
 		},
 		
@@ -187,7 +225,7 @@ var handleNewObjectRefresh = function(obj){
 		
 		stop: function(event, ui) {
 			
-			ignoreResizeHover = false;
+			ignoreZoomRecalibration = false;
 		}
 	});
 	
@@ -195,8 +233,7 @@ var handleNewObjectRefresh = function(obj){
 		
 		 tempX: 0,
 		 tempY: 0,
-		 parent: null,
-		 parentPosition: null,
+		 tParent: null,
 		 width: null,
 		 height: null,
 		 tLeft: null,
@@ -204,10 +241,7 @@ var handleNewObjectRefresh = function(obj){
 		
 		start: function(evt, ui){
 			//When starting a drag, focus on object, and calculate initial CSS values
-			focusOn(cachejQObj);
-			parent = cachejQObj.parent();
-			parentPosition = {top: parseInt(parent.css("top")), left: parseInt(parent.css("left"))};
-			
+			tParent = cachejQObj.parent();
 			
 			width = cachejQObj.width();
 			height = cachejQObj.height();
@@ -219,7 +253,7 @@ var handleNewObjectRefresh = function(obj){
 			$("#canvas").add(cachejQObj).css("cursor", "none");
 			
 			//Stop refreshing location onHover
-			ignoreResizeHover = true;
+			ignoreZoomRecalibration = true;
 			
 			handleZoomJumpFix(cachejQObj, ui, currentResizePosition);
 			
@@ -235,29 +269,26 @@ var handleNewObjectRefresh = function(obj){
 			tTop = tempY+evt.clientY;
 			tLeft = tempX+evt.clientX;
 			
-			console.log(tTop + " " + tLeft);
-			console.log(parentPosition.top + " " + parentPosition.left);
+			//console.log(tTop + " " + tLeft);
 			
-			if(tTop < parentPosition.top)
-				tTop = parentPosition.top;
+			if(tTop < 0)
+				tTop = 0;
 			
-			else if(tTop + height > parentPosition.top + parent.height())
-				tTop = parentPosition.top + parent.height()-height;
+			else if(tTop + height > tParent.height())
+				tTop = tParent.height()-height-1;
 			
-			if(tLeft < parentPosition.left)
-				tLeft = parentPosition.left;
+			if(tLeft < 0)
+				tLeft = 0;
 			
-			else if(tLeft + width > parentPosition.left + parent.width())
-				tLeft = parentPosition.left + parent.width()-width;
-			
+			else if(tLeft + width > tParent.width())
+				tLeft = tParent.width()-width-1;
 			
 			handleZoomJumpFix(cachejQObj, ui, {top: tTop, left: tLeft});
-			
 		},
 		
 		stop: function(evt, ui){
 			
-			ignoreResizeHover = false;
+			ignoreZoomRecalibration = false;
 
 			//Show cursor again
 			$("#canvas").css("cursor", "default");
@@ -271,7 +302,6 @@ var handleNewObjectRefresh = function(obj){
 
 var focusOn = function(obj){
 
-	$(".draggable").css("border","#AAA solid 1px");
 	obj.css("border","red solid 1px");
 };
 
@@ -281,7 +311,7 @@ var handleZoom = function(opt){
 	
 	var zoomOpt = {closeclick:false, root:$("#canvas"), debug:false};
 	
-	if(previouslyBeingEdited == null)
+	if(cachejQObj == null)
 		return;
 		
 	currentZoom = (currentZoom == null) ? 0.4 : currentZoom;
@@ -290,14 +320,14 @@ var handleZoom = function(opt){
 		
 		currentZoom = (currentZoom < 1) ? currentZoom + .2: currentZoom;
 		zoomOpt.targetsize = currentZoom;
-		$("#"+previouslyBeingEdited.id).zoomTo(zoomOpt);
+		$(cachejQObj).zoomTo(zoomOpt);
 	}
 	
 	else{
 		
 		currentZoom = (currentZoom > .2)? currentZoom - .2: currentZoom;
 		zoomOpt.targetsize = currentZoom;
-		$("#"+previouslyBeingEdited.id).zoomTo(zoomOpt);
+		$(cachejQObj).zoomTo(zoomOpt);
 	}
 	
 	console.log("Current Zoom: " + currentZoom);
@@ -323,6 +353,7 @@ $(function(){
 	$("#canvas").on("click", ".object", function(event){
 		
 		console.log(isBeingEdited);
+		
 		
 		$(".draggable").css("border","#AAA solid 1px");
 		var temp = $(this).attr("id").split("_");
@@ -363,11 +394,11 @@ $(function(){
 				break;
 				
 			case "addText":
-				tempObj = addObject("text", "Edit Me");
+				addObject("text", "Edit Me");
 				break;
 			
 			case "addImage":
-				tempObj = addObject("image", "Edit Me");
+				addObject("image", "Edit Me");
 				break;
 				
 			case "zoomIn":
@@ -379,40 +410,37 @@ $(function(){
 				break;
 		}
 		
-		handleNewObjectRefresh(tempObj);
+		
 		console.log(self.currentSlide());
 		console.log(self.allSlides());
 	});
 	
 	//Handle mini slide clicking
 	$("#canvas").on("mousedown", ".object, .slide", function(event){
+			
+		$(".draggable").css("border","#AAA solid 1px");
 		
-		if(!ignoreResizeHover){
+		if(!ignoreZoomRecalibration){
 			cachejQObj = $(this);
 			currentResizePosition = {left: parseInt(cachejQObj.css("left")), 
-									top: parseInt(cachejQObj.css("top"))};
-			
-			console.log("current resize");
-			console.log(currentResizePosition);
+									top: parseInt(cachejQObj.css("top"))};			
 		}
-	});
-	
-	//Handle mini slide clicking
-	$("#sideSlides").on("click", ".allSlides", function(event){
 		
+		if($(this).attr("id")[0] == "o"){
+			focusOn(cachejQObj);
+			
+		}
 		
-		
-		var temp = $(this).attr("id").split("_")[1];
-		if(self.currentSlide() != temp){
+		else{
+			
+			var temp = $(this).attr("id").split("-");
+			self.focusOnSlide(self.allSlides()[temp[1]]);
+		}
 		
 
-			$("#s_"+self.currentSlide()).css({"border-color":"black"});
-			$(this).css({"border-color":"red"});
-			
-			console.log("border red: " + self.currentSlide());
-			
-			self.currentSlide(temp);
-		}
+		
+		
+		event.stopPropagation();
 	});
 });
 

@@ -59,7 +59,7 @@
 		<div class="row-fluid">
 		  <div id="sideSlides" class="span2" data-bind="foreach: allSlides">
 			
-			<div class="allSlides" data-bind="attr:{id:$root.getSlideId($index)}"></div>
+			<div class="allSlides" data-bind="attr:{id:$root.getSlideId($index)}, click: $root.focusOnSlide"></div>
 		  </div>
 		  
 
@@ -95,6 +95,9 @@
 		var presentationTemp  = new presentationModel;
 	
 		ko.applyBindings(presentationTemp);
+		
+		addSlide();
+		addObject("text", "Your first slide!");
 	</script>
   </body>
 </html>
