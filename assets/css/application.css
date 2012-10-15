@@ -33,8 +33,8 @@ li{
 	display: block;
 	width: 500px;
 	height: 300px;
-	top: 0;
-	left: 0;
+	top: 20%;
+	left: 20%;
 	position: absolute !important;
 }
 
