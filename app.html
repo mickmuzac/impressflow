@@ -45,6 +45,7 @@
             <ul class="nav">
               <li class="addSlide">Add Slide</li>
               <li class="addText">Add Text</li>
+			  <li class="addImage">Add Image</li>
 			  <li class="zoomIn"><i class="icon-zoom-in icon-white"></i></li>
 			  <li class="zoomOut"><i class="icon-zoom-out icon-white"></i></li>
               <li><a href="#contact">Contact</a></li>
@@ -68,10 +69,15 @@
 					
 				<div class="slide" data-bind="foreach: allObjects, attr:{id:id}">
 					<div data-bind="attr:{id:id}" style="font-size: 24px; line-height: 24px;" class="draggable resizable object ui-widget-content">
-						<span data-bind="text:readSanatizedValue"></span>
+						
 						
 						<!-- ko if:type == "text" -->
+							<span data-bind="text:readSanatizedValue"></span>
 							<textarea style="display: none;"  data-bind="value:value" type='text' ></textarea>
+						<!-- /ko -->
+						
+						<!-- ko if:type == "image" -->
+							<img data-bind="attr:{src:value}" />
 						<!-- /ko -->
 					</div>
 					

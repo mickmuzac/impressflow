@@ -402,7 +402,7 @@ $(function(){
 				break;
 			
 			case "addImage":
-				addObject("image", "Edit Me");
+				addObject("image", "testImage.png");
 				break;
 				
 			case "zoomIn":
