@@ -412,6 +412,10 @@ $(function(){
 			case "zoomOut":
 				handleZoom("out");
 				break;
+				
+			case "save":
+				console.log(ko.toJSON(self));
+				break;
 		}
 		
 		
