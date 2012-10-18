@@ -4,9 +4,37 @@ cachejQObj = null, ignoreZoomRecalibration = false;
 var canvasHeight = $('#canvas').height();
 var canvasWidth = $('#canvas').width();
 
+
+//Take in jQuery object or slide, and returns KO object or slide
+var getRealObject = function(obj){
+
+	if(obj instanceof jQuery){
+	
+		if(obj.attr("id")[0] == "s"){
+		
+			var temp = obj.attr("id").split("-");
+			var tempCurrentClickNow = self.allSlides()[temp[1]];
+		}
+		
+		else{
+			
+			console.log("REAL OBJ");
+			console.log(obj.attr("id"));
+			var temp = obj.attr("id").split("_");
+			var tempCurrentClickNow = self.allSlides()[temp[2]].allObjects()[temp[1]];
+		}
+		
+		return tempCurrentClickNow;
+	}
+	
+	else return obj;
+};
+
 //This function copies the "edit" style from a main style
 var loadInitialStyle = function(obj){
 	
+	obj = getRealObject(obj);
+
 	var id = (obj.type == "text") ? "#"+obj.id + "" : "#" + obj.id;
 	var styleArr = ["font-size", "color", "line-height", "height", "width", "top", "left", "display"];
 	var tempArr = {};
@@ -108,7 +136,9 @@ var slideObject = function(id){
 		//A slide object on the canvas is defined here
 		this.id = "s-" + id;
 		this.sidebarId = "s_" + id;
+		this.type = "slide";
 		
+		this.style = null;
 		this.allObjects = ko.observableArray();
 };
 
@@ -203,6 +233,7 @@ var handleNewSlideRefresh = function(slide){
 		stop: function(event, ui) {
 			
 			ignoreZoomRecalibration = false;
+			loadInitialStyle($(this));
 		}
 	
 	});
@@ -344,11 +375,8 @@ $(function(){
 	
 	$("#canvas").on("blur", "textarea", function(event){
 		
-		
-		var temp = $(this).parent().attr("id").split("_");
-		if(isBeingEdited == self.allSlides()[temp[2]].allObjects()[temp[1]]){
-			
-			console.log("BLUR ");
+		if(isBeingEdited == getRealObject($(this).parent())){
+	
 			objectStopClick(isBeingEdited);
 		}
 	});
@@ -360,8 +388,7 @@ $(function(){
 		
 		
 		$(".draggable").css("border","#AAA solid 1px");
-		var temp = $(this).attr("id").split("_");
-		var tempCurrentClickNow = self.allSlides()[temp[2]].allObjects()[temp[1]];
+		var tempCurrentClickNow = getRealObject($(this));
 		
 		if(tempCurrentClickNow == isBeingEdited)
 			return false;
