@@ -66,7 +66,7 @@
 -->
 <div id="impress" data-bind="foreach:allSlides">
 
-    <div class="step slide" data-bind="foreach: allObjects, attr:$root.test($index), style:style">
+    <div class="step slide" data-bind="foreach: allObjects, attr:$root.test($index), style: $root.getStyle($index)">
 		<div class="object" data-bind="attr:getAttr, style: style">
 			<!-- ko if:type == "text" -->
 				<span data-bind="text:value"></span>
@@ -80,13 +80,14 @@
 </div>
 <script src="assets/js/knockout-2.1.0.js"></script>
 <script src="assets/js/knockout.mapping-latest.js"></script>
+<script src="assets/js/jquery.js"></script>
 <script>
 if ("ontouchstart" in document.documentElement) { 
     document.querySelector(".hint").innerHTML = "<p>Tap on the left or right to navigate</p>";
 }
 
 
-var savedObj = {"allSlides":[{"id":"s-0","sidebarId":"s_0","type":"slide","style":{"font-size":"14px","color":"rgb(51, 51, 51)","line-height":"20px","height":"300px","width":"500px","top":"17px","left":"9px","display":"block"},"allObjects":[{"type":"text","value":"Good morning Vietnam!","readSanatizedValue":"Good morning Vietnam!","id":"o_0_0","style":{"font-size":"24px","color":"rgb(34, 34, 34)","line-height":"24px","height":"40px","width":"271px","top":"21px","left":"95px","display":"block"},"helper":null},{"type":"image","value":"testImage.png","readSanatizedValue":"testImage.png","id":"o_1_0","style":{"font-size":"24px","color":"rgb(34, 34, 34)","line-height":"24px","height":"131px","width":"359px","top":"116px","left":"79px","display":"block"},"helper":null}]},{"id":"s-1","sidebarId":"s_1","type":"slide","style":{"font-size":"14px","color":"rgb(51, 51, 51)","line-height":"20px","height":"300px","width":"500px","top":"42px","left":"532px","display":"block"},"allObjects":[{"type":"image","value":"testImage.png","readSanatizedValue":"testImage.png","id":"o_0_1","style":{"font-size":"24px","color":"rgb(34, 34, 34)","line-height":"24px","height":"98px","width":"392px","top":"7px","left":"17px","display":"block"},"helper":null},{"type":"text","value":"Edit Me or what?","readSanatizedValue":"Edit Me or what?","id":"o_1_1","style":{"font-size":"24px","color":"rgb(34, 34, 34)","line-height":"24px","height":"87px","width":"321px","top":"183px","left":"88px","display":"block"},"helper":null}]}],"currentSlide":"1"};
+var savedObj = {"allSlides":[{"id":"s-0","sidebarId":"s_0","type":"slide","style":{"font-size":"14px","color":"rgb(51, 51, 51)","line-height":"20px","height":"300px","width":"500px","top":"751px","left":"-246px","display":"block"},"allObjects":[{"type":"text","value":"Your first slide!","readSanatizedValue":"Your first slide!","id":"o_0_0","style":{"font-size":"24px","color":"rgb(34, 34, 34)","line-height":"24px","height":"100px","width":"100px","top":"91px","left":"84px","display":"block"},"helper":null}]},{"id":"s-1","sidebarId":"s_1","type":"slide","style":{"font-size":"14px","color":"rgb(51, 51, 51)","line-height":"20px","height":"300px","width":"500px","top":"-761px","left":"1332px","display":"block"},"allObjects":[{"type":"image","value":"testImage.png","readSanatizedValue":"testImage.png","id":"o_0_1","style":{"font-size":"24px","color":"rgb(34, 34, 34)","line-height":"24px","height":"100px","width":"100px","top":"135px","left":"338px","display":"block"},"helper":null}]},{"id":"s-2","sidebarId":"s_2","type":"slide","style":{"font-size":"14px","color":"rgb(51, 51, 51)","line-height":"20px","height":"300px","width":"500px","top":"-913px","left":"-1199px","display":"block"},"allObjects":[{"type":"image","value":"testImage.png","readSanatizedValue":"testImage.png","id":"o_0_2","style":{"font-size":"24px","color":"rgb(34, 34, 34)","line-height":"24px","height":"100px","width":"100px","top":"73px","left":"130px","display":"block"},"helper":null}]}],"currentSlide":"0"} ;
 
 var getAttr = {name: "HELLO?"};
 
@@ -109,14 +110,26 @@ var funct = function(index){
 	return obj;
 }
 
-var presentationTemp  = {
+
+var presentationTemp  = function(){
 	
-	test: funct,
-	allSlides: savedObj.allSlides
+	var self = this;
+	
+	self.test = funct;
+	self.allSlides = savedObj.allSlides;
+	self.getStyle = function(index){
+	
+		var tempObj = jQuery.extend(true, {}, savedObj.allSlides[index()].style);
+		delete tempObj.left;
+		delete tempObj.top;
+		console.log(tempObj);
+		
+		return tempObj; 
+	};
 };
 
 
-ko.applyBindings(presentationTemp);
+ko.applyBindings(new presentationTemp());
 </script>
 
 <!--
