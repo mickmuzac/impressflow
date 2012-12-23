@@ -5,22 +5,25 @@ var canvasHeight = $('#canvas').height();
 var canvasWidth = $('#canvas').width();
 
 
-//Take in jQuery object or slide, and returns KO object or slide
+//Take in generalized ID, jQuery object or slide, and returns KO object or slide
 var getRealObject = function(obj){
-
-	if(obj instanceof jQuery){
 	
-		if(obj.attr("id")[0] == "s"){
+
+	if(obj instanceof jQuery || typeof obj == "string"){
 		
-			var temp = obj.attr("id").split("-");
+		var tempId = (typeof obj == "string")? obj : obj.attr("id");
+		
+		if(tempId[0] == "s"){
+		
+			var temp = tempId.split("-");
 			var tempCurrentClickNow = self.allSlides()[temp[1]];
 		}
 		
 		else{
 			
 			console.log("REAL OBJ");
-			console.log(obj.attr("id"));
-			var temp = obj.attr("id").split("_");
+			console.log(tempId);
+			var temp = tempId.split("_");
 			var tempCurrentClickNow = self.allSlides()[temp[2]].allObjects()[temp[1]];
 		}
 		
@@ -37,14 +40,36 @@ var loadInitialStyle = function(obj){
 
 	var id = (obj.type == "text") ? "#"+obj.id + "" : "#" + obj.id;
 	var styleArr = ["font-size", "color", "line-height", "height", "width", "top", "left", "display"];
-	var tempArr = {};
+	var tempObj = {};
 	var length = styleArr.length;
 	
 	for(var i = 0; i < length; i++)
-		tempArr[styleArr[i]] = $(id).css(styleArr[i]);
+		tempObj[styleArr[i]] = $(id).css(styleArr[i]);
 	
-	obj.style = tempArr;
-	return tempArr;		
+	obj.style = tempObj;
+	loadAttributeStyle(tempObj);
+	return tempObj;		
+};
+
+
+var loadAttributeStyle = function(style){
+
+
+	var attrMap = {"top":"data-x", "left":"data-y", "data-scale": null, "data-rotate": "data-rotate",
+				   "data-z":null};
+	var attrObj = {};
+	
+	$.each(attrMap, function(key, value) {
+	
+	
+      if(style[key] != undefined)
+		attrObj[value] = parseInt(style[key]);
+	});
+	
+	console.log("ATTR: ");
+	console.log(attrObj);
+	
+	
 };
 
 //Content edit expects a contentObject and will go into "edit" mode depending on type
@@ -92,22 +117,27 @@ var objectStopClick = function(obj){
 
 var contentObject = function(obj){
 
-	var self = this;
-	self.type = obj.type;
-	self.value = ko.observable(obj.value);
+	var me = this;
+	me.type = obj.type;
+	me.value = ko.observable(obj.value);
 	
-	//Read only!
+	//Read only! ... needs to be sanitized further
 	this.readSanatizedValue = ko.computed(function(){
-		self.value($.trim(self.value()));
-		return self.value();
+		me.value($.trim(me.value()));
+		return me.value();
 	});
-	self.id = obj.id;
+	me.id = obj.id;
+	me.slideId = self.allSlides()[self.currentSlide()].id;
 	
-	self.style = null;
-	self.helper = null;
+	me.style = null;
+	me.helper = null;
 };
 
 //Generate an object, push it to the correct slide, and assign it an ID
+/*
+	WARNING, IDs MUST NOT DEPEND ON THE LENGTH OF AN ARRAY!! PROBLEMS WILL OCCUR WITH DELETIONS! (unless observable)
+	WARNING STILL APPLIES!! Random ID gen might be a solution here..
+*/
 var addObject = function(type, value){
 	
 	var temp = self.allSlides()[self.currentSlide()].allObjects;
@@ -127,6 +157,7 @@ var addSlide = function(){
 	self.allSlides.valueHasMutated();
 	
 	handleNewSlideRefresh(tempSlide);
+	self.focusOnSlide(tempSlide);
 	//console.log(tempSlide);
 	return tempSlide;
 };
@@ -139,6 +170,7 @@ var slideObject = function(id){
 		this.type = "slide";
 		
 		this.style = null;
+		this.attributes = null;
 		this.allObjects = ko.observableArray();
 };
 
@@ -215,7 +247,8 @@ var handleNewSlideRefresh = function(slide){
 			ignoreZoomRecalibration = true;
 			
 			//This is used to slightly fix the scale inaccuracies while dragging
-			tempZoom = (currentZoom == null || currentZoom == 0)? 1 : 1/currentZoom;
+			tempZoom = (currentZoom == null || currentZoom >= 0.6 || currentZoom < 0.2)? 1 : .8/currentZoom;
+			console.log("Zoom fix coefficient: ", tempZoom);
 			
 			tempX = currentResizePosition.left - tempZoom*evt.clientX;
 			tempY = currentResizePosition.top - tempZoom*evt.clientY;
@@ -223,6 +256,7 @@ var handleNewSlideRefresh = function(slide){
 		},
 		drag: function(evt, ui){
 	
+			
 			
 			tTop = tempY+tempZoom*evt.clientY;
 			tLeft = tempX+tempZoom*evt.clientX;
@@ -237,6 +271,7 @@ var handleNewSlideRefresh = function(slide){
 		}
 	
 	});
+	
 	console.log("#" + slide.id);
 };
 
@@ -273,9 +308,13 @@ var handleNewObjectRefresh = function(obj){
 		 height: null,
 		 tLeft: null,
 		 tTop: null,
+		 tempZoom: 1,
 		
 		start: function(evt, ui){
 			//When starting a drag, focus on object, and calculate initial CSS values
+			//self.focusOnSlide(getRealObject(getRealObject($(this)).slideId));
+			self.focusOnSlide(getRealObject(getRealObject($(this)).slideId));
+			
 			tParent = cachejQObj.parent();
 			
 			width = cachejQObj.width();
@@ -283,6 +322,7 @@ var handleNewObjectRefresh = function(obj){
 			
 			tempX = currentResizePosition.left - evt.clientX;
 			tempY = currentResizePosition.top - evt.clientY;
+			tempZoom = (currentZoom == null || currentZoom >= 0.6 || currentZoom < 0.2)? 1 : .8/currentZoom;
 			
 			//Scaling while zoomed in is still incorrect, hide cursor
 			$("#canvas").add(cachejQObj).css("cursor", "none");
@@ -333,6 +373,7 @@ var handleNewObjectRefresh = function(obj){
 						top: parseInt(cachejQObj.css("top"))};
 		}
 	});
+	
 };
 
 var focusOn = function(obj){
@@ -400,9 +441,7 @@ $(function(){
 				objectStopClick(isBeingEdited);
 			
 			objectClick(tempCurrentClickNow);
-		}
-		
-		
+		}		
 	});
 	
 	$("#canvas").on("keyup", "textarea", function(event){

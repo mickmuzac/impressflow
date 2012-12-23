@@ -36,6 +36,8 @@ li{
 	top: 20%;
 	left: 20%;
 	position: absolute !important;
+	rotation-point:50% 50%;
+	rotation:45deg;
 }
 
 .allSlides{
