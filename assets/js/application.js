@@ -75,6 +75,7 @@ var loadAttributeStyle = function(style){
 //Content edit expects a contentObject and will go into "edit" mode depending on type
 var objectClick = function(obj){
 	
+	$("#"+obj.id).zoomTarget();
 	console.log(obj);
 	
 	//It's important to note that Knockout.js takes care of setting "obj" for us
@@ -83,6 +84,8 @@ var objectClick = function(obj){
 	console.log(styles);
 	
 	if(obj.type == "text"){
+		
+	
 		$("#"+obj.id + " span").hide();
 		$("#"+obj.id + " textarea").show();
 		$("#"+obj.id + " textarea").focusToEnd();
@@ -146,6 +149,7 @@ var addObject = function(type, value){
 		
 	self.allSlides.valueHasMutated();
 	handleNewObjectRefresh(tempObj, "object");
+	loadInitialStyle(tempObj);
 	
 	return tempObj;
 };
@@ -158,6 +162,8 @@ var addSlide = function(){
 	
 	handleNewObjectRefresh(tempSlide, "slide");
 	self.focusOnSlide(tempSlide);
+	loadInitialStyle(tempSlide);
+	
 	//console.log(tempSlide);
 	return tempSlide;
 };
@@ -253,6 +259,7 @@ var handleNewObjectRefresh = function(obj, objType){
 			stop: function(event, ui) {
 				
 				ignoreZoomRecalibration = false;
+				event.stopPropagation();
 			}
 		});
 	}
@@ -317,14 +324,15 @@ var handleNewObjectRefresh = function(obj, objType){
 				this.tTop = this.offsetCalc;
 			
 			else if(this.tTop + this.height + this.offsetCalc > this.tParent.height())
-				this.tTop = this.tParent.height()-this.height-1 + this.offsetCalc;
+				this.tTop = this.tParent.height()-this.height-1 - this.offsetCalc;
 			
 			if(this.tLeft < this.offsetCalc)
 				this.tLeft = this.offsetCalc;
 			
 			else if(this.tLeft + this.width + this.offsetCalc > this.tParent.width())
-				this.tLeft = this.tParent.width()-this.width-1 + this.offsetCalc;
+				this.tLeft = this.tParent.width()-this.width-1 - this.offsetCalc;
 			
+			console.log(this.tTop, this.tLeft);
 			handleZoomJumpFix(cachejQObj, ui, {top: this.tTop, left: this.tLeft});
 		},
 		
@@ -338,6 +346,9 @@ var handleNewObjectRefresh = function(obj, objType){
 			
 			currentResizePosition = {left: parseInt(cachejQObj.css("left")), 
 						top: parseInt(cachejQObj.css("top"))};
+						
+			if(this.objectType != "container")
+				loadInitialStyle(cachejQObj);
 		}
 	});
 	

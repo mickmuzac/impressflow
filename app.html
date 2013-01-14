@@ -99,13 +99,19 @@
 	<script src="assets/js/jquery.zoomooz.min.js"></script>
 	
 	<script>
-		var presentationTemp  = new presentationModel;
-	
-		ko.applyBindings(presentationTemp);
+		$(document).ready(function(){
+			var presentationTemp  = new presentationModel;
 		
-		addSlide();
-		addObject("text", "Your first slide!");
-		handleNewObjectRefresh({id:"canvas"}, "container");
+			ko.applyBindings(presentationTemp);
+			
+			addSlide();
+			addObject("text", "Your first slide!");
+			handleNewObjectRefresh({id:"canvas"}, "container");
+			
+			//One time function.. this centers the canvas
+			var tempContainer = $("#canvasContainer");
+			var tempCanvas = $("#canvas");
+		});
 	</script>
   </body>
 </html>
