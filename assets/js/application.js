@@ -34,7 +34,7 @@ var getRealObject = function(obj){
 };
 
 //This function copies the "edit" style from a main style
-var loadInitialStyle = function(obj){
+var loadInitialStyle = function(obj, isNewSlide){
 	
 	obj = getRealObject(obj);
 
@@ -42,6 +42,13 @@ var loadInitialStyle = function(obj){
 	var styleArr = ["font-size", "color", "line-height", "height", "width", "top", "left", "display"];
 	var tempObj = {};
 	var length = styleArr.length;
+	
+	if(isNewSlide === true && currentZoom < 1){
+	
+		var pos = $(id).position();
+		console.log("debug location zoom: ", pos);
+		$(id).css({top:(pos.top * 1/currentZoom) + "px", left: (pos.left* 1/currentZoom) + "px"});
+	}
 	
 	for(var i = 0; i < length; i++)
 		tempObj[styleArr[i]] = $(id).css(styleArr[i]);
@@ -162,7 +169,7 @@ var addSlide = function(){
 	
 	handleNewObjectRefresh(tempSlide, "slide");
 	self.focusOnSlide(tempSlide);
-	loadInitialStyle(tempSlide);
+	loadInitialStyle(tempSlide, true);
 	
 	//console.log(tempSlide);
 	return tempSlide;
