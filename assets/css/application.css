@@ -33,8 +33,8 @@ li{
 	display: block;
 	width: 500px;
 	height: 300px;
-	top: 0%;
-	left: 0%;
+	top: 50%;
+	left: 50%;
 	position: absolute !important;
 	rotation-point:50% 50%;
 	rotation:45deg;
@@ -55,8 +55,8 @@ li{
 	width: 10000px;
 	height: 10000px;
 	border: 1px solid red;
-	top: 0%;
-	left: 0%;
+	top: -5000px;
+	left: -5000px;
 }
 
 #canvas textarea{
