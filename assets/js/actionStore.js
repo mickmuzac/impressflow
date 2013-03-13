@@ -34,8 +34,9 @@ function actionStore(){
 			return;
 		
 		var tempAction = mainStack.pop();
-		this.addAction(saveAndReturnStyles(cachejQObj), "move", cachejQObj.attr("id"), inverseStack);
 		handleFocus(false, true, $("#" + tempAction.id));
+		this.addAction(saveAndReturnStyles(cachejQObj), "move", cachejQObj.attr("id"), inverseStack);
+		
 		
 		$.each(tempAction.currentState, function(key, value){
 		
