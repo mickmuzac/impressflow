@@ -94,11 +94,14 @@
     <script src="assets/js/jquery.js"></script>
     <script src="assets/js/jquery-ui.js"></script>
     <script src="assets/js/bootstrap.js"></script>
+	<script src="assets/js/actionStore.js"></script>
 	<script src="assets/js/application.js"></script>
 	<script src="assets/js/knockout-2.1.0.js"></script>
 	
 	<script>
+		
 		$(document).ready(function(){
+			
 			var presentationTemp  = new presentationModel;
 		
 			ko.applyBindings(presentationTemp);
@@ -110,6 +113,21 @@
 			//One time function.. this centers the canvas
 			var tempContainer = $("#canvasContainer");
 			var tempCanvas = $("#canvas");
+			
+			$(document).keydown(function(e){
+			
+				//console.log(e);
+				if(e.ctrlKey == true){
+				
+					switch(e.which){
+						
+						case 90: store.performChange(true); break;
+						case 89: store.performChange(false); break;
+					}
+				}
+			});
+			
+			
 		});
 	</script>
   </body>

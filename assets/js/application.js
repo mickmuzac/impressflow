@@ -4,6 +4,7 @@ cachejQObj = null, ignoreZoomRecalibration = false;
 var canvasHeight = $('#canvas').height();
 var canvasWidth = $('#canvas').width();
 
+var store = new actionStore();
 
 //Take in generalized ID, jQuery object or slide, and returns KO object or slide
 var getRealObject = function(obj){
@@ -34,13 +35,13 @@ var getRealObject = function(obj){
 };
 
 //This function copies the "edit" style from a main style
-var loadInitialStyle = function(obj, isNewSlide){
+var saveAndReturnStyles = function(obj, isNewSlide){
 	
 	obj = getRealObject(obj);
 
 	var id = (obj.type == "text") ? "#"+obj.id + "" : "#" + obj.id;
 	var styleArr = ["font-size", "color", "line-height", "height", "width", "top", "left", "display"];
-	var tempObj = {};
+	var tempObjStyles = {};
 	var length = styleArr.length;
 	
 	if(isNewSlide === true && currentZoom < 1){
@@ -51,11 +52,47 @@ var loadInitialStyle = function(obj, isNewSlide){
 	}
 	
 	for(var i = 0; i < length; i++)
-		tempObj[styleArr[i]] = $(id).css(styleArr[i]);
+		tempObjStyles[styleArr[i]] = $(id).css(styleArr[i]);
 	
-	obj.style = tempObj;
-	loadAttributeStyle(tempObj);
-	return tempObj;		
+	obj.style = tempObjStyles;
+	loadAttributeStyle(tempObjStyles);
+	return tempObjStyles;		
+};
+
+var handleFocus = function(event, usingRedo, jqObj){
+			
+	$(".draggable").css("border","#AAA solid 1px");
+	
+	if(event){
+		event.stopPropagation();
+	}
+	
+	//This makes it so that cachejQObj isn't reloaded during a drag
+	if(!ignoreZoomRecalibration){
+		cachejQObj = usingRedo === true ? jqObj : $(this);
+		currentResizePosition = {left: parseInt(cachejQObj.css("left")), 
+								top: parseInt(cachejQObj.css("top"))};			
+	}
+	
+	else return;
+	
+	if(cachejQObj.attr("id")[0] == "o"){
+		focusOn(cachejQObj);
+		cachejQObj.typeOfObject = "object";
+	}
+	
+	else if(cachejQObj.attr("id")[0] == "s"){
+		
+		var temp = cachejQObj.attr("id").split("-");
+		cachejQObj.typeOfObject = "slide";
+		self.focusOnSlide(self.allSlides()[temp[1]]);
+	}
+	
+	else{
+		cachejQObj.typeOfObject = "container";
+	}
+	
+	
 };
 
 
@@ -86,7 +123,7 @@ var objectClick = function(obj){
 	console.log(obj);
 	
 	//It's important to note that Knockout.js takes care of setting "obj" for us
-	var styles = loadInitialStyle(obj);//(obj.style == null) ? loadInitialStyle(obj) : obj.style;
+	var styles = saveAndReturnStyles(obj);//(obj.style == null) ? saveAndReturnStyles(obj) : obj.style;
 
 	console.log(styles);
 	
@@ -156,7 +193,7 @@ var addObject = function(type, value){
 		
 	self.allSlides.valueHasMutated();
 	handleNewObjectRefresh(tempObj, "object");
-	loadInitialStyle(tempObj);
+	saveAndReturnStyles(tempObj);
 	
 	return tempObj;
 };
@@ -169,7 +206,7 @@ var addSlide = function(){
 	
 	handleNewObjectRefresh(tempSlide, "slide");
 	self.focusOnSlide(tempSlide);
-	loadInitialStyle(tempSlide, true);
+	saveAndReturnStyles(tempSlide, true);
 	
 	//console.log(tempSlide);
 	return tempSlide;
@@ -317,6 +354,8 @@ var handleNewObjectRefresh = function(obj, objType){
 				var temp = cachejQObj.attr("id").split("_");
 				previouslyBeingEdited = self.allSlides()[temp[2]].allObjects()[temp[1]];
 			}
+			
+			store.addAction(saveAndReturnStyles(cachejQObj), "move", cachejQObj.attr("id"));
 		},
 		
 		drag: function(evt, ui){
@@ -355,7 +394,7 @@ var handleNewObjectRefresh = function(obj, objType){
 						top: parseInt(cachejQObj.css("top"))};
 						
 			if(this.objectType != "container")
-				loadInitialStyle(cachejQObj);
+				saveAndReturnStyles(cachejQObj);
 		}
 	});
 	
@@ -479,34 +518,7 @@ $(function(){
 	});
 	
 	//Handle mini slide clicking
-	$("#canvasContainer").on("mousedown", ".object, .slide, #canvas", function(event){
-			
-		$(".draggable").css("border","#AAA solid 1px");
-		
-		if(!ignoreZoomRecalibration){
-			cachejQObj = $(this);
-			currentResizePosition = {left: parseInt(cachejQObj.css("left")), 
-									top: parseInt(cachejQObj.css("top"))};			
-		}
-		
-		if(cachejQObj.attr("id")[0] == "o"){
-			focusOn(cachejQObj);
-			cachejQObj.typeOfObject = "object";
-		}
-		
-		else if(cachejQObj.attr("id")[0] == "s"){
-			
-			var temp = cachejQObj.attr("id").split("-");
-			cachejQObj.typeOfObject = "slide";
-			self.focusOnSlide(self.allSlides()[temp[1]]);
-		}
-		
-		else{
-			cachejQObj.typeOfObject = "container";
-		}
-		
-		event.stopPropagation();
-	});
+	$("#canvasContainer").on("mousedown", ".object, .slide, #canvas", handleFocus);
 });
 
 (function($) {
