@@ -62,7 +62,10 @@
 
 		<div id="sideSlides" class="span2" data-bind="foreach: allSlides">
 			
-			<div class="allSlides" data-bind="attr:{id:$root.getSlideId($index)}, click: $root.focusOnSlide, element:canvasScreen"></div>
+			<div class="allSlides" data-bind="attr:{id:$root.getSlideId($index)}, click: $root.focusOnSlide">
+			
+				<img data-bind="attr:{src:canvasScreen}" />
+			</div>
 		  </div>
 
 		  <div id="canvasContainer" class="zoomViewport droppable span10">
@@ -125,8 +128,8 @@
 			html2canvas($(".slide")[0], {
 				onrendered: function(canvas) {
 					// canvas is the final rendered <canvas> element
-					console.log(canvas);
-					self.allSlides()[0].canvasScreen(canvas);					
+					console.log(canvas.toDataURL());
+					self.allSlides()[0].canvasScreen(canvas.toDataURL("image/png"));					
 				}
 			});
 			
