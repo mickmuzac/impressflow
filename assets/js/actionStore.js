@@ -6,12 +6,12 @@ function actionStore(){
 	
 	var typeToInverse = {
 	
-		move : function(styleObj){ return {left:styleObj.left, top:styleObj.top}},
+		move : function(styles){ return {left:styles.left, top:styles.top}},
 		rotate: "rotate",
 		add: "remove"
 	};
 
-	this.addAction = function(style, kind, id, stackToAddTo){
+	this.addAction = function(styles, kind, id, stackToAddTo){
 		
 		//Empty redo stack whenever a new action is performed
 		if(stackToAddTo === undefined){
@@ -20,8 +20,9 @@ function actionStore(){
 		}
 		
 		stackToAddTo = stackToAddTo ? stackToAddTo : globalStack;
-		stackToAddTo.push({currentState:typeToInverse[kind](style), type:kind, id: id});
+		stackToAddTo.push({currentState:typeToInverse[kind](styles), type:kind, id: id});
 		
+		generateCanvasScreen(id);
 		console.log(stackToAddTo);
 	};
 	
