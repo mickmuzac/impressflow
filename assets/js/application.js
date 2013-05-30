@@ -222,6 +222,7 @@ var slideObject = function(id){
 		this.style = null;
 		this.attributes = null;
 		this.allObjects = ko.observableArray();
+		this.canvasScreen = ko.observable();
 };
 
 var presentationModel = function() {

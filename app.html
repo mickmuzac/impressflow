@@ -59,11 +59,11 @@
     <div class="container-fluid">
 
 		<div class="row-fluid">
-		  <div id="sideSlides" class="span2" data-bind="foreach: allSlides">
+
+		<div id="sideSlides" class="span2" data-bind="foreach: allSlides">
 			
-			<div class="allSlides" data-bind="attr:{id:$root.getSlideId($index)}, click: $root.focusOnSlide"></div>
+			<div class="allSlides" data-bind="attr:{id:$root.getSlideId($index)}, click: $root.focusOnSlide, element:canvasScreen"></div>
 		  </div>
-		  
 
 		  <div id="canvasContainer" class="zoomViewport droppable span10">
 			  <div id="canvas" class="zoomContainer" data-bind="foreach: allSlides">
@@ -97,18 +97,38 @@
 	<script src="assets/js/actionStore.js"></script>
 	<script src="assets/js/application.js"></script>
 	<script src="assets/js/knockout-2.1.0.js"></script>
+	<script src="assets/js/html2canvas.js"></script>
 	
 	<script>
 		
 		$(document).ready(function(){
-			
-			var presentationTemp  = new presentationModel;
-		
+			ko.bindingHandlers.element = {
+				update: function(element, valueAccessor, allBindingsAccessor){
+					var value = ko.utils.unwrapObservable(valueAccessor());
+					console.log(element, value);
+					if(value){
+						
+						$(value).height(202);
+						$(value).width(127);
+						$(element).html(value);
+					}
+				}
+			};
+
+			var presentationTemp  = new presentationModel;		
 			ko.applyBindings(presentationTemp);
 			
 			addSlide();
 			addObject("text", "Your first slide!");
 			handleNewObjectRefresh({id:"canvas"}, "container");
+			
+			html2canvas($(".slide")[0], {
+				onrendered: function(canvas) {
+					// canvas is the final rendered <canvas> element
+					console.log(canvas);
+					self.allSlides()[0].canvasScreen(canvas);					
+				}
+			});
 			
 			//One time function.. this centers the canvas
 			var tempContainer = $("#canvasContainer");
