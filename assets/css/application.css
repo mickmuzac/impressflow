@@ -55,8 +55,9 @@ li{
 	width: 10000px;
 	height: 10000px;
 	border: 1px solid red;
-	top: -5000px;
-	left: -5000px;
+	top: 0px;
+	left: 0px;
+	position:relative;
 }
 
 #canvas textarea{

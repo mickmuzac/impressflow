@@ -79,6 +79,7 @@ var handleFocus = function(event, usingRedo, jqObj){
 	if(cachejQObj.attr("id")[0] == "o"){
 		focusOn(cachejQObj);
 		cachejQObj.typeOfObject = "object";
+		$('#canvasContainer').scrollTo(currentResizePosition.left, currentResizePosition.top);
 	}
 	
 	else if(cachejQObj.attr("id")[0] == "s"){
@@ -86,6 +87,7 @@ var handleFocus = function(event, usingRedo, jqObj){
 		var temp = cachejQObj.attr("id").split("-");
 		cachejQObj.typeOfObject = "slide";
 		self.focusOnSlide(self.allSlides()[temp[1]]);
+		$('#canvasContainer').scrollTo(cachejQObj);
 	}
 	
 	else{
@@ -565,8 +567,8 @@ $(function(){
 
         options = $.extend({}, {
             gap: {
-                x: 0,
-                y: 0
+                x: parseInt($("#canvas").css("left"),10),
+                y: parseInt($("#canvas").css("top"),10)
             },
             animation: {
                 easing: 'swing',
@@ -578,9 +580,13 @@ $(function(){
 
         return this.each(function(){
             var elem = $(this);
+			if(isNaN(Number(x)) && isNaN(Number(y))){
+				y = x;
+				console.log($(x).offset());
+			}
             elem.stop().animate({
-                scrollLeft: !isNaN(Number(x)) ? x : $(x).offset().left + options.gap.x,
-                scrollTop: !isNaN(Number(y)) ? y : $(y).offset().top + options.gap.y
+                scrollLeft: !isNaN(Number(x)) ? x : parseInt($(x).css("left"),10) + options.gap.x,
+                scrollTop: !isNaN(Number(y)) ? y : parseInt($(y).css("top"),10) + options.gap.y
             }, options.animation);
         });
     };
