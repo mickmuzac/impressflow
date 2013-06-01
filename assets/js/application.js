@@ -59,8 +59,11 @@ var saveAndReturnStyles = function(obj, isNewSlide){
 	return tempObjStyles;		
 };
 
-var handleFocus = function(event, usingRedo, jqObj){
-			
+var handleFocus = function(event, _redoOrObject, jqObj){
+	
+	var me = $(this);
+	me = _redoOrObject && _redoOrObject.id ? $('#'+_redoOrObject.id) : me;
+
 	$(".draggable").css("border","#AAA solid 1px");
 	
 	if(event){
@@ -69,7 +72,7 @@ var handleFocus = function(event, usingRedo, jqObj){
 	
 	//This makes it so that cachejQObj isn't reloaded during a drag
 	if(!ignoreZoomRecalibration){
-		cachejQObj = usingRedo === true ? jqObj : $(this);
+		cachejQObj = _redoOrObject === true ? jqObj : me;
 		currentResizePosition = {left: parseInt(cachejQObj.css("left")), 
 								top: parseInt(cachejQObj.css("top"))};			
 	}
@@ -87,7 +90,6 @@ var handleFocus = function(event, usingRedo, jqObj){
 		var temp = cachejQObj.attr("id").split("-");
 		cachejQObj.typeOfObject = "slide";
 		self.focusOnSlide(self.allSlides()[temp[1]]);
-		$('#canvasContainer').scrollTo(cachejQObj);
 	}
 	
 	else{
@@ -276,6 +278,8 @@ var presentationModel = function() {
 	
 		//Keeps track of the current slide
 		self.currentSlide(slideObj.id.split("-")[1]);
+		
+		$('#canvasContainer').scrollTo(cachejQObj);
 	};
 };
 

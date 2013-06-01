@@ -62,7 +62,7 @@
 
 		<div id="sideSlides" class="span2" data-bind="foreach: allSlides">
 			
-			<div class="allSlides" data-bind="attr:{id:$root.getSlideId($index)}, click: $root.focusOnSlide">
+			<div class="allSlides" data-bind="attr:{id:$root.getSlideId($index)}, click: function(o,e){$root.handleFocus(e, o)}">
 			
 				<img data-bind="attr:{src:canvasScreen}" />
 			</div>
@@ -106,6 +106,7 @@
 		$(document).ready(function(){
 
 			var presentationTemp  = new presentationModel;		
+			presentationTemp.handleFocus = handleFocus;		
 			ko.applyBindings(presentationTemp);
 			
 			addSlide();
