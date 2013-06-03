@@ -66,8 +66,6 @@ var handleFocus = function(event, _redoOrObject, jqObj){
 	
 	if(event){
 		event.stopPropagation();
-		
-		//if(
 	}
 	
 	//This makes it so that cachejQObj isn't reloaded during a drag
@@ -80,8 +78,21 @@ var handleFocus = function(event, _redoOrObject, jqObj){
 	else return;
 	
 	if(cachejQObj.attr("id")[0] == "o"){
+		var tempCurrentClickNow = getRealObject(cachejQObj);
 		focusOn(cachejQObj);
-		self.focusOnSlide(getRealObject(cachejQObj.attr("id")).slideId, event);
+		self.focusOnSlide(tempCurrentClickNow.slideId, event);		
+		
+		if(tempCurrentClickNow == isBeingEdited)
+			return false;
+		
+		else{
+		
+			//These calls are only for objects that are being newly focused on..				
+			if(isBeingEdited != null)
+				objectStopClick(isBeingEdited);
+			
+			objectClick(tempCurrentClickNow);
+		}	
 	}
 	
 	else if(cachejQObj.attr("id")[0] == "s"){
@@ -470,26 +481,6 @@ $(function(){
 	});
 	
 	//Handle object AND full slide clicking
-	$("#canvas").on("click", ".object", function(event){
-		
-		console.log(isBeingEdited);
-		
-		
-		$(".draggable").css("border","#AAA solid 1px");
-		var tempCurrentClickNow = getRealObject($(this));
-		
-		if(tempCurrentClickNow == isBeingEdited)
-			return false;
-		
-		else{
-		
-			//These calls are only for objects that are being newly focused on..				
-			if(isBeingEdited != null)
-				objectStopClick(isBeingEdited);
-			
-			objectClick(tempCurrentClickNow);
-		}		
-	});
 	
 	$("#canvas").on("keyup", "textarea", function(event){
 		
