@@ -71,7 +71,7 @@
 		  <div id="canvasContainer" class="zoomViewport droppable span10">
 			  <div id="canvas" class="zoomContainer" data-bind="foreach: allSlides">
 				<div class="slide" data-bind="foreach: allObjects, attr:{id:id}">
-					<div data-bind="attr:{id:id}" style="font-size: 24px; line-height: 24px;" class="draggable resizable object ui-widget-content">
+					<div data-bind="attr:{id:id}" class="draggable resizable object ui-widget-content">
 						
 						
 						<!-- ko if:type == "text" -->
@@ -96,8 +96,12 @@
     <script src="assets/js/jquery.js"></script>
     <script src="assets/js/jquery-ui.js"></script>
     <script src="assets/js/bootstrap.js"></script>
-	<script src="assets/js/actionStore.js"></script>
-	<script src="assets/js/application.js"></script>
+	
+	<script src="core/actionStore.js"></script>
+	<script src="core/plugins.js"></script>
+	<script src="core/application.js"></script>
+	<script src="core/events.js"></script>
+	
 	<script src="assets/js/knockout-2.1.0.js"></script>
 	<script src="assets/js/html2canvas.js"></script>
 	
