@@ -59,50 +59,53 @@ var saveAndReturnStyles = function(obj, isNewSlide){
 
 var handleFocus = function(event, _redoOrObject, jqObj){
 	console.log(event);
-	var me = $(this);
-	me = _redoOrObject && _redoOrObject.id ? $('#'+_redoOrObject.id) : me;
-
-	$(".draggable").css("border","#AAA solid 1px");
-	
 	if(event){
 		event.stopPropagation();
 	}
 	
 	//This makes it so that cachejQObj isn't reloaded during a drag
 	if(!isBeingDragged){
+		var me = $(this);
+		
+		//_redoOrObject could be redo boolean or entire object
+		me = _redoOrObject && _redoOrObject.id ? $('#'+_redoOrObject.id) : me;
 		cachejQObj = _redoOrObject === true ? jqObj : me;
+		
+		$(".draggable").css("border","#AAA solid 1px");
+		
 		currentResizePosition = {left: parseInt(cachejQObj.css("left")), 
 								top: parseInt(cachejQObj.css("top"))};			
-	}
 	
-	else return;
-	
-	if(cachejQObj.attr("id")[0] == "o"){
-		var tempCurrentClickNow = getRealObject(cachejQObj);
-		focusOn(cachejQObj);
-		self.focusOnSlide(tempCurrentClickNow.slideId, event);		
+		if(cachejQObj.attr("id")[0] == "o"){
+			
+			var tempCurrentClickNow = getRealObject(cachejQObj);
+			focusOn(cachejQObj);
+			
+			if(tempCurrentClickNow == isBeingEdited)
+				return false;
+			
+			else{
+			
+				//These calls are only for objects that are being newly focused on..				
+				objectStopClick();
+				
+				if(event && event.type == 'click')
+					objectClick(tempCurrentClickNow);
+				
+				self.focusOnSlide(tempCurrentClickNow.slideId, event);		
+			}	
+		}
 		
-		if(tempCurrentClickNow == isBeingEdited)
-			return false;
+		else if(cachejQObj.attr("id")[0] == "s"){
+			objectStopClick();
+			self.focusOnSlide(cachejQObj.attr("id"), event);
+		}
 		
 		else{
-		
-			//These calls are only for objects that are being newly focused on..				
-			if(isBeingEdited != null)
-				objectStopClick(isBeingEdited);
-			
-			objectClick(tempCurrentClickNow);
-		}	
+			objectStopClick();
+			//cachejQObj.typeOfObject = "container";
+		}
 	}
-	
-	else if(cachejQObj.attr("id")[0] == "s"){
-		self.focusOnSlide(cachejQObj.attr("id"), event);
-	}
-	
-	/*else{
-		cachejQObj.typeOfObject = "container";
-	}*/
-	
 };
 
 
@@ -152,20 +155,23 @@ var objectClick = function(obj){
 };
 
 //Stop click is also synonymous for stop edit!
-var objectStopClick = function(obj){
+var objectStopClick = function(){
 	
-	console.log("STOP: " + $("#"+obj.id));
-	
-	if(obj.type == "text"){
+	var obj = isBeingEdited;
+	if(obj != null){
 		
-		handleNewObjectRefresh(obj, "object");
+		console.log("STOP: " + $("#"+obj.id));
+		if(obj.type == "text"){
+			
+			handleNewObjectRefresh(obj, "object");
+			
+			$("#"+obj.id + " span").show();
+			$("#"+obj.id + " textarea").hide();
+		}
 		
-		$("#"+obj.id + " span").show();
-		$("#"+obj.id + " textarea").hide();
+		previouslyBeingEdited = isBeingEdited;
+		isBeingEdited = null;
 	}
-	
-	previouslyBeingEdited = isBeingEdited;
-	isBeingEdited = null;
 };
 
 var contentObject = function(obj){
@@ -283,10 +289,10 @@ var presentationModel = function() {
 		//Keeps track of the current slide
 		self.currentSlide(slideObj.id.split("-")[1]);
 		
-		if(event && event.type == 'mousedown')
-			return;
-		
-		$('#canvasContainer').scrollTo($("#" + slideObj.id));
+		//Scroll only if we're clicking on the slide
+		if(event && event.type == 'click' && !isBeingEdited){
+			$('#canvasContainer').scrollTo($("#" + slideObj.id));
+		}
 	};
 };
 

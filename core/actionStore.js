@@ -15,7 +15,7 @@ function actionStore(){
 		
 		//Empty redo stack whenever a new action is performed
 		if(stackToAddTo === undefined){
-			console.log("empty redo!!");
+			//console.log("empty redo!!");
 			globalRedoStack.length = 0;
 		}
 		
@@ -23,7 +23,7 @@ function actionStore(){
 		stackToAddTo.push({currentState:typeToInverse[kind](styles), type:kind, id: id});
 		
 		generateCanvasScreen(id);
-		console.log(stackToAddTo);
+		//console.log(stackToAddTo);
 	};
 	
 	this.performChange = function(undo){

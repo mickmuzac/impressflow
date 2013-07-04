@@ -118,6 +118,14 @@
 			handleNewObjectRefresh({id:"canvas"}, "container");
 			
 			
+
+			
+			//One time function.. this centers the canvas
+			var tempContainer = $("#canvasContainer");
+			var tempCanvas = $("#canvas");
+			$('#canvasContainer').scrollTo(tempCanvas.width()*.5,tempCanvas.height()*.5 );
+			
+			
 			html2canvas($(".slide")[0], {
 				onrendered: function(canvas) {
 					// canvas is the final rendered <canvas> element
@@ -125,11 +133,6 @@
 					self.allSlides()[0].canvasScreen(canvas.toDataURL("image/png"));					
 				}
 			});
-			
-			//One time function.. this centers the canvas
-			var tempContainer = $("#canvasContainer");
-			var tempCanvas = $("#canvas");
-			$('#canvasContainer').scrollTo(tempCanvas.width()*.5,tempCanvas.height()*.5 );
 			
 			$(document).keydown(function(e){
 			
