@@ -429,8 +429,12 @@ var handleNewObjectRefresh = function(obj, objType){
 			currentResizePosition = {left: parseInt(cachejQObj.css("left")), 
 						top: parseInt(cachejQObj.css("top"))};
 						
-			if(this.objectType != "container")
+			if(this.objectType != "container"){
 				saveAndReturnStyles(cachejQObj);
+				
+				if(this.objectType == "object")
+					generateCanvasScreen(cachejQObj);
+			}
 		}
 	});
 	

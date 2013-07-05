@@ -22,7 +22,6 @@ function actionStore(){
 		stackToAddTo = stackToAddTo ? stackToAddTo : globalStack;
 		stackToAddTo.push({currentState:typeToInverse[kind](styles), type:kind, id: id});
 		
-		generateCanvasScreen(id);
 		//console.log(stackToAddTo);
 	};
 	
