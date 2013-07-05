@@ -41,6 +41,10 @@ li{
 	background-color: #aaa;
 }
 
+.allSlides img{
+	width:100%;
+	height:100%;
+}
 .allSlides{
 
 	width: 200px;

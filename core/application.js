@@ -385,7 +385,7 @@ var handleNewObjectRefresh = function(obj, objType){
 
 			if(this.objectType == "object"){
 				//MAKE THE FOLLOWING 2 LINES A FUNCTION! (Eventually)
-				self.focusOnSlide(getRealObject($(this)).slideId);
+				//self.focusOnSlide(getRealObject($(this)).slideId);
 				var temp = cachejQObj.attr("id").split("_");
 				previouslyBeingEdited = self.allSlides()[temp[2]].allObjects()[temp[1]];
 			}
