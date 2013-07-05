@@ -51,7 +51,7 @@ $(function(){
 				break;
 		}
 		
-		
+		generateCanvasScreen(self.allSlides()[self.currentSlide()]);
 		console.log(self.currentSlide());
 		console.log(self.allSlides());
 	});
