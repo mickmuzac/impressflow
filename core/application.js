@@ -57,6 +57,16 @@ var saveAndReturnStyles = function(obj, isNewSlide){
 	return tempObjStyles;		
 };
 
+var handleResizeHandles = function(obj, action){
+	
+	if(obj === null)
+		$(".object .ui-resizable-handle").addClass("hide");
+	else if(action == "hide")
+		obj.children('.ui-resizable-handle').addClass("hide");	
+	else
+		obj.children('.ui-resizable-handle').removeClass("hide");
+};
+
 var handleFocus = function(event, _redoOrObject, jqObj){
 	console.log(event);
 	if(event){
@@ -159,11 +169,13 @@ var objectDoneEdit = function(){
 	
 	var obj = isBeingEdited;
 	if(obj != null){
-		
+	
 		console.log("STOP: " + $("#"+obj.id));
+
 		if(obj.type == "text"){
 			
 			handleNewObjectRefresh(obj, "object");
+			handleResizeHandles(null, "hide");
 			
 			$("#"+obj.id + " span").show();
 			$("#"+obj.id + " span").text($("#"+obj.id + " textarea").val());
@@ -444,6 +456,8 @@ var handleNewObjectRefresh = function(obj, objType){
 var focusOn = function(obj){
 
 	obj.css("border","red solid 1px");
+	handleResizeHandles(null, "hide");
+	handleResizeHandles(obj, "show");
 };
 
 var handleZoom = function(opt){

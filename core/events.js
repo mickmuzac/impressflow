@@ -5,7 +5,7 @@ $(function(){
 		
 		if(isBeingEdited == getRealObject($(this).parent())){
 	
-			objectStopClick(isBeingEdited);
+			objectDoneEdit(isBeingEdited);
 		}
 	});
 	

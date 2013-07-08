@@ -26,6 +26,10 @@ li{
 
 	
 }
+.hide{
+
+	display: none !important;
+}
 
 .slide{
 
