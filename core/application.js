@@ -87,7 +87,7 @@ var handleFocus = function(event, _redoOrObject, jqObj){
 			else{
 			
 				//These calls are only for objects that are being newly focused on..				
-				objectStopClick();
+				objectDoneEdit();
 				
 				if(event && event.type == 'click')
 					objectClick(tempCurrentClickNow);
@@ -97,12 +97,12 @@ var handleFocus = function(event, _redoOrObject, jqObj){
 		}
 		
 		else if(cachejQObj.attr("id")[0] == "s"){
-			objectStopClick();
+			objectDoneEdit();
 			self.focusOnSlide(cachejQObj.attr("id"), event);
 		}
 		
 		else{
-			objectStopClick();
+			objectDoneEdit();
 			//cachejQObj.typeOfObject = "container";
 		}
 	}
@@ -155,7 +155,7 @@ var objectClick = function(obj){
 };
 
 //Stop click is also synonymous for stop edit!
-var objectStopClick = function(){
+var objectDoneEdit = function(){
 	
 	var obj = isBeingEdited;
 	if(obj != null){
@@ -166,6 +166,7 @@ var objectStopClick = function(){
 			handleNewObjectRefresh(obj, "object");
 			
 			$("#"+obj.id + " span").show();
+			$("#"+obj.id + " span").text($("#"+obj.id + " textarea").val());
 			$("#"+obj.id + " textarea").hide();
 		}
 		
