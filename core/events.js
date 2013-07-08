@@ -59,4 +59,5 @@ $(function(){
 	//Handle mini slide clicking
 	$("#canvasContainer").on("mousedown", ".object, .slide, #canvas", handleFocus);
 	$("#canvasContainer").on("click", ".object, .slide, #canvas", handleFocus);
+	$("#canvasContainer").on("dblclick", ".object, .slide, #canvas", handleFocus);
 });

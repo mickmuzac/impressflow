@@ -89,7 +89,7 @@ var handleFocus = function(event, _redoOrObject, jqObj){
 				//These calls are only for objects that are being newly focused on..				
 				objectDoneEdit();
 				
-				if(event && event.type == 'click')
+				if(event && event.type == 'dblclick')
 					objectClick(tempCurrentClickNow);
 				
 				self.focusOnSlide(tempCurrentClickNow.slideId, event);		
